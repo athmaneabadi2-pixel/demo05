@@ -18,6 +18,6 @@
     "Demande mon accord avant d'agir pour moi."
   ],
   "interests": ["design produit", "course à pied", "lecture"],
-  "preferences": { "reply_max_chars": 350, "emoji_level": "léger" },
+  "preferences": { "reply_max_chars": 250, "emoji_level": "léger" },
   "whatsapp": { "to": "whatsapp:+33XXXXXXXXX" }
 }
