@@ -13,6 +13,24 @@ load_dotenv()
 
 app = Flask(__name__)
 memory = Memory(profile_path=PROFILE_PATH)
+# -- ajoute ça une seule fois au niveau module (pas dans une route) --
+def _env_flags():
+    keys = [
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_SANDBOX_FROM",
+        "USER_WHATSAPP_TO",
+        "OPENAI_API_KEY",
+    ]
+    return {k: bool(os.getenv(k)) for k in keys}
+
+@app.post("/internal/envcheck")
+def internal_envcheck():
+    expected = os.getenv("INTERNAL_TOKEN")
+    provided = request.headers.get("X-Token")
+    if not expected or provided != expected:
+        return jsonify({"error": "forbidden"}), 403
+    return jsonify({"present": _env_flags()}), 200
 
 @app.get("/health")
 def health():
@@ -39,19 +57,6 @@ def internal_send():
 
 @app.post("/internal/checkin")
 def internal_checkin():
-   def _env_flags():
-    keys = ["TWILIO_ACCOUNT_SID","TWILIO_AUTH_TOKEN","TWILIO_SANDBOX_FROM",
-            "USER_WHATSAPP_TO","OPENAI_API_KEY"]
-    return {k: bool(os.getenv(k)) for k in keys}
-
-@app.post("/internal/envcheck")
-def internal_envcheck():
-    expected = os.getenv("INTERNAL_TOKEN")
-    provided = request.headers.get("X-Token")
-    if not expected or provided != expected:
-        return jsonify({"error":"forbidden"}), 403
-    return jsonify({"present": _env_flags()}), 200
-
     """Déclenche un check-in du matin.
        - Protégé par X-Token (même logique que /internal/send)
        - Envoie WhatsApp si TWILIO_* présents, sinon dry-run
