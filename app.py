@@ -24,13 +24,6 @@ def _env_flags():
     ]
     return {k: bool(os.getenv(k)) for k in keys}
 
-@app.post("/internal/envcheck")
-def internal_envcheck():
-    expected = os.getenv("INTERNAL_TOKEN")
-    provided = request.headers.get("X-Token")
-    if not expected or provided != expected:
-        return jsonify({"error": "forbidden"}), 403
-    return jsonify({"present": _env_flags()}), 200
 
 @app.get("/health")
 def health():
